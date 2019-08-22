@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Muvity API Example</title>
+</head>
+<body>
+<h1>First 100 cities (agent count)</h1>
+  <ul id="cities">
+  </ul>
+<script
+  src="https://code.jquery.com/jquery-3.4.1.min.js"
+  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+  crossorigin="anonymous"></script>
+<script type="text/javascript">
+    function getQuery() {
+        var query = `query CitiesQuery($first: Int) {
+                cities(first: $first, orderBy:[{field:AGENTS_COUNT, direction: DESC}]) {
+                    edges {
+                        node {
+                            id
+                            _id
+                            city
+                            agentsCount
+                        }
+                    }
+                } 
+            }`;
+        return JSON.stringify({
+          operationName: 'CitiesQuery',
+          query: query,
+          variables: {
+            first: 100
+          }
+        });
+    }
+
+    $.ajax({
+      url: 'https://graphql.muvity.com/graphql',
+      type: 'POST',
+      contentType: 'application/json',
+      data: getQuery()
+    }).done(function (response) {
+        var cityEdges = response.data.cities.edges;
+        for (var i = 0; i < cityEdges.length; i++) {
+          var item = $("<li>").text(cityEdges[i].node.city + ' (' + cityEdges[i].node.agentsCount + ')');
+          $("#cities").append(item);
+        }
+    });
+</script>
+</body>
+</html>
